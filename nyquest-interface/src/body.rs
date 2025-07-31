@@ -44,7 +44,10 @@ pub enum Body<S> {
     },
 }
 
-impl<S> Debug for Body<S> {
+impl<S> Debug for Body<S>
+where
+    S: Debug,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Body::Bytes {
@@ -60,12 +63,16 @@ impl<S> Debug for Body<S> {
                 .field("fields", fields)
                 .finish(),
             #[cfg(feature = "multipart")]
-            Body::Multipart { parts: _ } => f.debug_struct("Body::Multipart").finish(),
+            Body::Multipart { parts } => f
+                .debug_struct("Body::Multipart")
+                .field("parts", parts)
+                .finish(),
             Body::Stream {
-                stream: _,
+                stream: reader,
                 content_type,
             } => f
                 .debug_struct("Body::Stream")
+                .field("reader", reader)
                 .field("content_type", content_type)
                 .finish(),
         }
